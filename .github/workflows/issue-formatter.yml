@@ -39,11 +39,19 @@ jobs:
                - `good first issue` — simple, beginner-friendly task
                - `duplicate` — if it seems like a known/repeated problem
 
+               If (and only if) you apply the `bug` label, also add exactly one severity label
+               based on your judgment of impact:
+               - `severity: critical` — game is unplayable, crashes, freezes, or data/progress loss
+               - `severity: high` — major functionality broken (e.g. core mechanic fails: rotation, scoring, line clears)
+               - `severity: medium` — noticeable issue with a workaround, affects some but not all users/cases
+               - `severity: low` — cosmetic, edge case, or minor visual glitch
+
             2. **Post a comment** on the issue that includes:
                - A brief, friendly summary of what the issue is about (1-2 sentences)
                - A "Formatted Report" section with:
                  - **Type**: Bug / Feature Request / Question / Other
                  - **Summary**: one clear sentence describing the problem or request
+                 - **Severity** (for bugs only): the severity level and a one-sentence justification
                  - **Steps to reproduce** (for bugs): list them if not provided, ask the user to provide them if it's a bug
                  - **Expected behavior** (for bugs): what should happen
                  - **Suggested labels**: the labels you applied and why
