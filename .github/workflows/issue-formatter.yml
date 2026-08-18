@@ -1,0 +1,107 @@
+name: Issue Formatter
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  format-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Format and Label Issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Convert to lowercase for pattern matching
+          TITLE_LOWER=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]')
+          BODY_LOWER=$(echo "$ISSUE_BODY" | tr '[:upper:]' '[:lower:]')
+          COMBINED="$TITLE_LOWER $BODY_LOWER"
+
+          # Initialize labels array
+          LABELS=()
+
+          # Detect issue type and assign labels
+          if echo "$COMBINED" | grep -qiE "(bug|broken|crash|error|not work|fail|issue|problem)"; then
+            LABELS+=("bug")
+            ISSUE_TYPE="Bug"
+          elif echo "$COMBINED" | grep -qiE "(feature|add|new|improve|enhancement|request)"; then
+            LABELS+=("enhancement")
+            ISSUE_TYPE="Feature Request"
+          elif echo "$COMBINED" | grep -qiE "(question|help|how|confused|understand)"; then
+            LABELS+=("question")
+            ISSUE_TYPE="Question"
+          elif echo "$COMBINED" | grep -qiE "(doc|documentation|readme|guide|tutorial)"; then
+            LABELS+=("documentation")
+            ISSUE_TYPE="Documentation"
+          else
+            ISSUE_TYPE="Other"
+          fi
+
+          # Add "good first issue" if marked as simple/beginner
+          if echo "$COMBINED" | grep -qiE "(simple|easy|beginner|first|starter)"; then
+            LABELS+=("good first issue")
+          fi
+
+          # Add "duplicate" if mentioned
+          if echo "$COMBINED" | grep -qiE "(duplicate|same as|related to|similar)"; then
+            LABELS+=("duplicate")
+          fi
+
+          # Apply labels if any were detected
+          if [ ${#LABELS[@]} -gt 0 ]; then
+            LABEL_STR=$(printf '%s\n' "${LABELS[@]}" | paste -sd ',' -)
+            gh issue edit "$ISSUE_NUMBER" --add-label "$LABEL_STR" --repo "$REPO" || true
+          fi
+
+          # Create formatted report
+          SUMMARY=$(echo "$ISSUE_BODY" | head -1 | cut -c1-100)
+
+          # Build the comment
+          COMMENT="## 📋 Issue Formatter Report
+
+Thank you for the report, @$ISSUE_AUTHOR!
+
+**Issue Type:** $ISSUE_TYPE
+
+**Summary:** $ISSUE_TITLE
+
+"
+
+          # Add sections based on type
+          if [ "$ISSUE_TYPE" = "Bug" ]; then
+            COMMENT+="**Steps to reproduce:**
+- (Please provide steps if not already listed in the issue)
+
+**Expected behavior:**
+- The feature should work as intended
+
+"
+          fi
+
+          # Add labels section
+          COMMENT+="**Applied Labels:** "
+          if [ ${#LABELS[@]} -gt 0 ]; then
+            for label in "${LABELS[@]}"; do
+              COMMENT+="\`$label\` "
+            done
+          else
+            COMMENT+="(none auto-detected)"
+          fi
+
+          COMMENT+="
+
+---
+Thanks for contributing! 🙌"
+
+          # Post the comment
+          gh issue comment "$ISSUE_NUMBER" --body "$COMMENT" --repo "$REPO"
