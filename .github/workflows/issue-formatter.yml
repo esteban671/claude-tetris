@@ -35,39 +35,39 @@ jobs:
           echo "Body: $ISSUE_BODY"
           echo "Combined (lowercase): $COMBINED"
 
-          # Detect issue type and assign labels
+          # Detect issue type and assign labels (patrones en inglés y español)
           ISSUE_TYPE="Other"
-          if echo "$COMBINED" | grep -qiE "(bug|broken|crash|error|not work|fail|doesn't work|doesn't|doesn't work|stop|stuck|freeze|lag)"; then
+          if echo "$COMBINED" | grep -qiE "(bug|broken|crash|error|not work|fail|doesn't work|stop|stuck|freeze|lag|bloquea|bloqueo|crashe|falla|fallando|no funciona|se cierra|se congela|se cuelga|lento|traba|se traba|roto|rota)"; then
             LABELS+=("bug")
             ISSUE_TYPE="Bug"
             echo "Detected as Bug"
           fi
 
-          if echo "$COMBINED" | grep -qiE "(feature|add|new|improve|improvement|enhancement|request|suggest|idea)"; then
+          if echo "$COMBINED" | grep -qiE "(feature|add|new|improve|improvement|enhancement|request|suggest|idea|agregar|añadir|nueva funcion|nueva función|nuevo|mejora|mejorar|sugerencia|sugerir|propuesta)"; then
             LABELS+=("enhancement")
             ISSUE_TYPE="Feature Request"
             echo "Detected as Feature Request"
           fi
 
-          if echo "$COMBINED" | grep -qiE "(question|help|how|confused|understand|why|what|where)"; then
+          if echo "$COMBINED" | grep -qiE "(question|help|how|confused|understand|why|what|where|pregunta|ayuda|como |cómo |no entiendo|duda|porque |por qué|donde |dónde )"; then
             LABELS+=("question")
             ISSUE_TYPE="Question"
             echo "Detected as Question"
           fi
 
-          if echo "$COMBINED" | grep -qiE "(doc|documentation|readme|guide|tutorial|update docs|missing docs)"; then
+          if echo "$COMBINED" | grep -qiE "(doc|documentation|readme|guide|tutorial|update docs|missing docs|documentacion|documentación|actualizar docs|falta documentacion|falta documentación|guia|guía)"; then
             LABELS+=("documentation")
             ISSUE_TYPE="Documentation"
             echo "Detected as Documentation"
           fi
 
           # Add "good first issue" if marked as simple/beginner
-          if echo "$COMBINED" | grep -qiE "(simple|easy|beginner|first|starter)"; then
+          if echo "$COMBINED" | grep -qiE "(simple|easy|beginner|first|starter|facil|fácil|principiante|sencillo)"; then
             LABELS+=("good first issue")
           fi
 
           # Add "duplicate" if mentioned
-          if echo "$COMBINED" | grep -qiE "(duplicate|same as|related to|similar)"; then
+          if echo "$COMBINED" | grep -qiE "(duplicate|same as|related to|similar|duplicado|ya existe|relacionado con|similar a)"; then
             LABELS+=("duplicate")
           fi
 
