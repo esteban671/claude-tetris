@@ -63,45 +63,31 @@ jobs:
             gh issue edit "$ISSUE_NUMBER" --add-label "$LABEL_STR" --repo "$REPO" || true
           fi
 
-          # Build the comment with heredoc
-          read -r -d '' COMMENT << EOF
-## 📋 Issue Formatter Report
-
-Thank you for the report, @$ISSUE_AUTHOR!
-
-**Issue Type:** $ISSUE_TYPE
-
-**Summary:** $ISSUE_TITLE
-
-EOF
+          # Build the comment
+          COMMENT="## 📋 Issue Formatter Report"
+          COMMENT="$COMMENT"$'\n\n'"Thank you for the report, @$ISSUE_AUTHOR!"
+          COMMENT="$COMMENT"$'\n\n'"**Issue Type:** $ISSUE_TYPE"
+          COMMENT="$COMMENT"$'\n\n'"**Summary:** $ISSUE_TITLE"
 
           # Add sections based on type
           if [ "$ISSUE_TYPE" = "Bug" ]; then
-            read -r -d '' BUG_SECTION << 'EOF'
-**Steps to reproduce:**
-- (Please provide steps if not already listed in the issue)
-
-**Expected behavior:**
-- The feature should work as intended
-
-EOF
-            COMMENT+="$BUG_SECTION"
+            COMMENT="$COMMENT"$'\n\n'"**Steps to reproduce:**"
+            COMMENT="$COMMENT"$'\n'"- (Please provide steps if not already listed in the issue)"
+            COMMENT="$COMMENT"$'\n\n'"**Expected behavior:**"
+            COMMENT="$COMMENT"$'\n'"- The feature should work as intended"
           fi
 
           # Add labels section
-          COMMENT+="**Applied Labels:** "
+          COMMENT="$COMMENT"$'\n\n'"**Applied Labels:** "
           if [ ${#LABELS[@]} -gt 0 ]; then
             for label in "${LABELS[@]}"; do
-              COMMENT+="\`$label\` "
+              COMMENT="$COMMENT"\`$label\`" "
             done
           else
-            COMMENT+="(none auto-detected)"
+            COMMENT="$COMMENT(none auto-detected)"
           fi
 
-          COMMENT+="
-
----
-Thanks for contributing! 🙌"
+          COMMENT="$COMMENT"$'\n\n'"---"$'\n'"Thanks for contributing! 🙌"
 
           # Post the comment
           gh issue comment "$ISSUE_NUMBER" --body "$COMMENT" --repo "$REPO"
