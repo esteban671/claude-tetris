@@ -30,21 +30,35 @@ jobs:
           # Initialize labels array
           LABELS=()
 
+          # Debug: show what we're analyzing
+          echo "Title: $ISSUE_TITLE"
+          echo "Body: $ISSUE_BODY"
+          echo "Combined (lowercase): $COMBINED"
+
           # Detect issue type and assign labels
-          if echo "$COMBINED" | grep -qiE "(bug|broken|crash|error|not work|fail|issue|problem)"; then
+          ISSUE_TYPE="Other"
+          if echo "$COMBINED" | grep -qiE "(bug|broken|crash|error|not work|fail|doesn't work|doesn't|doesn't work|stop|stuck|freeze|lag)"; then
             LABELS+=("bug")
             ISSUE_TYPE="Bug"
-          elif echo "$COMBINED" | grep -qiE "(feature|add|new|improve|enhancement|request)"; then
+            echo "Detected as Bug"
+          fi
+
+          if echo "$COMBINED" | grep -qiE "(feature|add|new|improve|improvement|enhancement|request|suggest|idea)"; then
             LABELS+=("enhancement")
             ISSUE_TYPE="Feature Request"
-          elif echo "$COMBINED" | grep -qiE "(question|help|how|confused|understand)"; then
+            echo "Detected as Feature Request"
+          fi
+
+          if echo "$COMBINED" | grep -qiE "(question|help|how|confused|understand|why|what|where)"; then
             LABELS+=("question")
             ISSUE_TYPE="Question"
-          elif echo "$COMBINED" | grep -qiE "(doc|documentation|readme|guide|tutorial)"; then
+            echo "Detected as Question"
+          fi
+
+          if echo "$COMBINED" | grep -qiE "(doc|documentation|readme|guide|tutorial|update docs|missing docs)"; then
             LABELS+=("documentation")
             ISSUE_TYPE="Documentation"
-          else
-            ISSUE_TYPE="Other"
+            echo "Detected as Documentation"
           fi
 
           # Add "good first issue" if marked as simple/beginner
@@ -59,8 +73,13 @@ jobs:
 
           # Apply labels if any were detected
           if [ ${#LABELS[@]} -gt 0 ]; then
-            LABEL_STR=$(printf '%s\n' "${LABELS[@]}" | paste -sd ',' -)
-            gh issue edit "$ISSUE_NUMBER" --add-label "$LABEL_STR" --repo "$REPO" || true
+            echo "Detected labels: ${LABELS[@]}"
+            for label in "${LABELS[@]}"; do
+              echo "Adding label: $label"
+              gh issue edit "$ISSUE_NUMBER" --add-label "$label" --repo "$REPO" 2>&1 || echo "Failed to add label: $label"
+            done
+          else
+            echo "No labels detected"
           fi
 
           # Build the comment
