@@ -63,11 +63,9 @@ jobs:
             gh issue edit "$ISSUE_NUMBER" --add-label "$LABEL_STR" --repo "$REPO" || true
           fi
 
-          # Create formatted report
-          SUMMARY=$(echo "$ISSUE_BODY" | head -1 | cut -c1-100)
-
-          # Build the comment
-          COMMENT="## 📋 Issue Formatter Report
+          # Build the comment with heredoc
+          read -r -d '' COMMENT << EOF
+## 📋 Issue Formatter Report
 
 Thank you for the report, @$ISSUE_AUTHOR!
 
@@ -75,17 +73,19 @@ Thank you for the report, @$ISSUE_AUTHOR!
 
 **Summary:** $ISSUE_TITLE
 
-"
+EOF
 
           # Add sections based on type
           if [ "$ISSUE_TYPE" = "Bug" ]; then
-            COMMENT+="**Steps to reproduce:**
+            read -r -d '' BUG_SECTION << 'EOF'
+**Steps to reproduce:**
 - (Please provide steps if not already listed in the issue)
 
 **Expected behavior:**
 - The feature should work as intended
 
-"
+EOF
+            COMMENT+="$BUG_SECTION"
           fi
 
           # Add labels section
