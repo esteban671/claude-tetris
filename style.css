@@ -77,6 +77,22 @@ body {
   border-radius: 4px;
 }
 
+/* ---- Tema ---- */
+#theme-select {
+  background: #22223a;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+#theme-select:focus {
+  outline: 1px solid #7aa2f7;
+}
+
 /* ---- Controles ---- */
 .controls ul {
   list-style: none;
