@@ -157,3 +157,133 @@ kbd {
 #restart-btn:hover {
   background: #9bbdff;
 }
+
+.overlay-heading {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #7aa2f7;
+}
+
+/* ---- Leaderboard / records ---- */
+.leaderboard-title {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #555570;
+  font-weight: 600;
+}
+
+.leaderboard {
+  width: 220px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+}
+
+.leaderboard-empty {
+  color: #555570;
+  font-size: 12px;
+  padding: 6px 0;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leaderboard-list > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #ccc;
+}
+
+.leaderboard-list .lb-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 130px;
+}
+
+.leaderboard-list .highlight {
+  background: rgba(122, 162, 247, 0.18);
+  color: #7aa2f7;
+  font-weight: 700;
+}
+
+.stats-line {
+  font-size: 12px;
+  color: #888;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.name-entry {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.name-entry.hidden {
+  display: none;
+}
+
+#name-input {
+  background: #1a1a25;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  color: #e0e0e0;
+  padding: 6px 8px;
+  font-size: 13px;
+  width: 120px;
+}
+
+#save-name-btn {
+  background: #7aa2f7;
+  color: #0f0f17;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#save-name-btn:hover {
+  background: #9bbdff;
+}
+
+#play-btn {
+  margin-top: 4px;
+  background: #7aa2f7;
+  color: #0f0f17;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.15s;
+}
+
+#play-btn:hover {
+  background: #9bbdff;
+}
+
+.secondary-btn {
+  background: transparent;
+  color: #888;
+  border: 1px solid #3a3a5a;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 12px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.secondary-btn:hover {
+  color: #e57373;
+  border-color: #e57373;
+}
