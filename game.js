@@ -28,6 +28,80 @@ const PIECES = [
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
 
+const PASTEL_COLORS = [
+  null,
+  '#a7e8ef', // I
+  '#fff3b0', // O
+  '#dcb8e6', // T
+  '#bfe3c0', // S
+  '#f4b6b6', // Z
+  '#bcc4ec', // J
+  '#fcd2a4', // L
+];
+
+const THEMES = {
+  retro: {
+    label: 'Retro',
+    palette: COLORS,
+    background: null,
+    corners: 'square',
+    glow: false,
+    texture: false,
+  },
+  neon: {
+    label: 'Neón',
+    palette: COLORS,
+    background: '#000000',
+    corners: 'square',
+    glow: true,
+    texture: false,
+  },
+  pastel: {
+    label: 'Pastel',
+    palette: PASTEL_COLORS,
+    background: null,
+    corners: 'round',
+    glow: false,
+    texture: false,
+  },
+  pixel: {
+    label: 'Pixel art',
+    palette: COLORS,
+    background: null,
+    corners: 'square',
+    glow: false,
+    texture: true,
+  },
+};
+
+const THEME_STORAGE_KEY = 'tetris-theme';
+let currentTheme = 'retro';
+
+function getTheme() {
+  return THEMES[currentTheme] || THEMES.retro;
+}
+
+function loadTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved && THEMES[saved]) currentTheme = saved;
+  } catch (err) {
+    // localStorage puede no estar disponible (file://, cookies bloqueadas, etc.)
+  }
+}
+
+function setTheme(theme) {
+  if (!THEMES[theme]) return;
+  currentTheme = theme;
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (err) {
+    // ignorar si localStorage no está disponible
+  }
+  if (typeof next !== 'undefined' && next) drawNext();
+  if (typeof current !== 'undefined' && current) draw();
+}
+
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
@@ -39,6 +113,7 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const themeSelect = document.getElementById('theme-select');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
@@ -156,15 +231,55 @@ function updateHUD() {
   levelEl.textContent = level;
 }
 
+function blockPath(context, px, py, w, h, rounded) {
+  context.beginPath();
+  if (rounded && context.roundRect) {
+    context.roundRect(px, py, w, h, Math.min(6, w / 4, h / 4));
+  } else {
+    context.rect(px, py, w, h);
+  }
+}
+
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const theme = getTheme();
+  const color = theme.palette[colorIndex] || COLORS[colorIndex];
+  const px = x * size + 1;
+  const py = y * size + 1;
+  const w = size - 2;
+  const h = size - 2;
+
   context.globalAlpha = alpha ?? 1;
+
+  if (theme.glow) {
+    context.shadowColor = color;
+    context.shadowBlur = size * 0.6;
+  }
+
+  blockPath(context, px, py, w, h, theme.corners === 'round');
   context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+  context.fill();
+
+  if (theme.glow) {
+    context.shadowBlur = 0;
+    context.shadowColor = 'transparent';
+  }
+
   // highlight
+  blockPath(context, px, py, w, Math.min(4, h), theme.corners === 'round');
   context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  context.fill();
+
+  if (theme.texture) {
+    const half = w / 2;
+    context.fillStyle = 'rgba(0,0,0,0.15)';
+    context.fillRect(px, py, half, half);
+    context.fillRect(px + half, py + half, w - half, h - half);
+    context.fillStyle = 'rgba(255,255,255,0.10)';
+    context.fillRect(px + half, py, w - half, half);
+    context.fillRect(px, py + half, half, h - half);
+  }
+
   context.globalAlpha = 1;
 }
 
@@ -187,6 +302,11 @@ function drawGrid() {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const theme = getTheme();
+  if (theme.background) {
+    ctx.fillStyle = theme.background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
   drawGrid();
 
   // board
@@ -210,6 +330,11 @@ function draw() {
 function drawNext() {
   const NB = 30;
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  const theme = getTheme();
+  if (theme.background) {
+    nextCtx.fillStyle = theme.background;
+    nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+  }
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
@@ -275,6 +400,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (e.target === themeSelect) return;
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -301,4 +427,10 @@ document.addEventListener('keydown', e => {
 
 restartBtn.addEventListener('click', init);
 
+themeSelect.addEventListener('change', e => {
+  setTheme(e.target.value);
+});
+
+loadTheme();
+themeSelect.value = currentTheme;
 init();
